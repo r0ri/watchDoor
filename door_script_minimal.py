@@ -73,7 +73,7 @@ def watch_door():
 
     while True:
 
-        if GPIO.input(PIR_pin) == 1 and pymixer.get_busy() is False:
+        if GPIO.input(PIR_pin) == 1 and pymixer.music.get_busy() is False:
             # define current index and get name of track
             curr_pos = playlist[counter % n]
             name = tracks[curr_pos]
