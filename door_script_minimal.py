@@ -17,7 +17,6 @@ import os
 import random
 import time
 import pygame.mixer as pymixer
-# from mutagen.mp3 import MP3
 
 # initialize GPIO ports
 PIR_pin = 15
@@ -38,16 +37,10 @@ def playlist_gen(n_items):
     return playlist_tmp
 
 
-def playback(track):  # , tracklen):
-    # global playing
+def playback(track):
 
     # sleep for 5 seconds before starting playback
     time.sleep(5)
-    # define timed variable so that playback does not get
-    # interrupted. also set delay after playback
-    # delay = 45
-    # now = time.time()
-    # playing = lambda: time.time() < now + tracklen + delay
 
     # load and play track
     pymixer.music.load(track)
@@ -70,10 +63,6 @@ def watch_door():
     :return: (empty)
     """
 
-    ## remove global variables
-    # global counter
-    # global playing
-
     # initialize counter variable
     counter = 0
     # get available tracks
@@ -83,14 +72,14 @@ def watch_door():
     playlist = playlist_gen(n)
 
     while True:
-        # if GPIO.input(PIR_pin)==1 and playing()==False:
+
         if GPIO.input(PIR_pin) == 1 and pymixer.get_busy() is False:
             # define current index and get name of track
             curr_pos = playlist[counter % n]
             name = tracks[curr_pos]
 
             # start playback
-            playback(name)  # , tracklength[curr_pos])
+            playback(name)
             
             # update counter
             counter += 1
@@ -113,13 +102,10 @@ def watch_door():
 
 # initialize pygame mixer
 pymixer.init(44100, -16, 2, 4096)
-pymixer.music.set_volume(0.5)  # 0.4 was a bit too quiet for deployment during party
+pymixer.music.set_volume(0.5)  # 0.4 was a bit too quiet for noisy environment
 
 # change to directory that contains sounds
 os.chdir('/home/pi/python/watchDoor/sounds')
-
-# tracklength = [int(MP3(f).info.length) for f in tracks]
-# n = len(tracks)
 
 # initialize log file
 with open('/home/pi/python/watchDoor/logfile.txt', 'a') as logfile:
@@ -128,14 +114,7 @@ with open('/home/pi/python/watchDoor/logfile.txt', 'a') as logfile:
     logfile.write('\nCurrent date:')
     logfile.write(time.strftime('%a, %d %b %Y %H:%M:%S'))
 
-## remove global variables
-# initialize playlist
-# playlist = playlist_gen()
-# initialize replay counter
-# counter = 0
-# initialize playing variable
-# playing = lambda:False # old playing variable
-
+# start main function
 try:
     watch_door()
 except KeyboardInterrupt:
