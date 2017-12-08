@@ -51,9 +51,14 @@ def playback(track):
     # load and play track
     pymixer.music.load(track)
     pymixer.music.play()
-    # add mp3 that contains 45 seconds of silence
-    # so two tracks don't play back to back
-    pymixer.music.queue('00_silence.mp3')
+
+    # pygame.mixer.music.queue() is broken for me
+    # using this hacky solution to address this situation
+    while pymixer.music.get_busy():
+        time.sleep(0.75)
+
+    pymixer.music.load('00_silence.mp3')
+    pymixer.music.play()
 
 
 def watch_door():
@@ -98,7 +103,7 @@ def watch_door():
             abort = True
 
             # write event to log file
-            with open('/home/pi/python/watchDoor/logfile_1x.txt', 'a') as logfile:
+            with open(folder + 'logfile_1x.txt', 'a') as logfile:
                 logfile.write('\n' + time.strftime('%H:%M:%S'))
                 logfile.write(' -- %s' % (name[:-4]))
                 
@@ -126,8 +131,10 @@ def watch_door():
 pymixer.init(44100, -16, 2, 4096)
 pymixer.music.set_volume(0.45)  # 0.4 was a bit too quiet for noisy environment
 
+folder = '/home/pi/watchDoor/'
+
 # change to directory that contains sounds
-os.chdir('/home/pi/python/watchDoor/sounds')
+os.chdir(folder + 'sounds/')
 
 # start main function
 try:
