@@ -47,7 +47,15 @@ def playback(track):
     pymixer.music.play()
     # add mp3 that contains 45 seconds of silence
     # so two tracks don't play back to back
-    pymixer.music.queue('00_silence.mp3')
+
+    # ---- queue is broken ----
+    # pymixer.music.queue('00_silence.mp3')
+
+    while pymixer.music.get_busy():
+        time.sleep(0.75)
+
+    pymixer.music.load('00_silence.mp3')
+    pymixer.music.play()
 
 
 def watch_door():
@@ -65,6 +73,7 @@ def watch_door():
 
     # initialize counter variable
     counter = 0
+
     # get available tracks
     tracks = [file for file in glob.glob('*.mp3')]
     n = len(tracks)
@@ -73,7 +82,7 @@ def watch_door():
 
     while True:
 
-        if GPIO.input(PIR_pin) == 1 and pymixer.music.get_busy() is False:
+        if GPIO.input(PIR_pin) == 1 and pymixer.music.get_busy() == 0:
             # define current index and get name of track
             curr_pos = playlist[counter % n]
             name = tracks[curr_pos]
@@ -85,7 +94,7 @@ def watch_door():
             counter += 1
 
             # write event to log file
-            with open('/home/pi/python/watchDoor/logfile', 'a') as logfile:
+            with open(folder + 'logfile.txt', 'a') as logfile:
                 logfile.write('\n' + time.strftime('%H:%M:%S'))
                 logfile.write(' -%d - %s' % (counter, name[:-4]))
                 
@@ -104,11 +113,13 @@ def watch_door():
 pymixer.init(44100, -16, 2, 4096)
 pymixer.music.set_volume(0.5)  # 0.4 was a bit too quiet for noisy environment
 
+folder = '/home/pi/watchDoor/'
+
 # change to directory that contains sounds
-os.chdir('/home/pi/python/watchDoor/sounds')
+os.chdir(folder + 'sounds/')
 
 # initialize log file
-with open('/home/pi/python/watchDoor/logfile.txt', 'a') as logfile:
+with open(folder + 'logfile.txt', 'a') as logfile:
     logfile.write('\n\n=======================')
     logfile.write('\nStarting Script')
     logfile.write('\nCurrent date:')
